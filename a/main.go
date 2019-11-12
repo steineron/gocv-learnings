@@ -70,23 +70,16 @@ func main() {
 	window := displayMat(gray, "grayed")
 
 	edged := gocv.NewMat()
-	gocv.Canny(gray, &edged, 75.0, 200.0)
+	//gocv.Canny(gray, &edged, 75.0, 200.0)
 	gocv.Canny(gray, &edged, 150.0, 175.0)
 
 	window = displayMat(edged, "edged once")
 
 	// then dilate
-	kernel := gocv.GetStructuringElement(gocv.MorphRect, image.Pt(5, 5))
+	kernel := gocv.GetStructuringElement(gocv.MorphRect, image.Pt(6, 6)) // or 5x5?
 	defer kernel.Close()
 	gocv.Dilate(edged, &edged, kernel)
 	window = displayMat(edged, "dilated")
-
-	//gocv.Canny(edged, &edged, 75.0, 200.0)
-	//window = displayMat(edged, "edged again")
-
-	//
-	//hull := gocv.NewMat()
-	//defer hull.Close()
 
 
 	/*
@@ -166,7 +159,7 @@ func main() {
 	window = gocv.NewWindow("detected lines")
 
 	gocv.Canny(mat, &matCanny, 50, 200)
-	gocv.HoughLinesP(matCanny, &matLines, 1, math.Pi/180, 80)
+	gocv.HoughLinesP(matCanny, &matLines, 1, math.Pi/180, 40)
 
 	fmt.Println(matLines.Cols())
 	fmt.Println(matLines.Rows())
@@ -174,6 +167,8 @@ func main() {
 		pt1 := image.Pt(int(matLines.GetVeciAt(i, 0)[0]), int(matLines.GetVeciAt(i, 0)[1]))
 		pt2 := image.Pt(int(matLines.GetVeciAt(i, 0)[2]), int(matLines.GetVeciAt(i, 0)[3]))
 		gocv.Line(&mat, pt1, pt2, color.RGBA{0, 255, 0, 50}, 2)
+		fmt.Println("Pt1:(", pt1.X, ", ", pt1.Y, ")" )
+		fmt.Println("Pt2: ", pt2)
 	}
 
 	for {
