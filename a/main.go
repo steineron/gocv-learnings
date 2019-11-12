@@ -49,10 +49,10 @@ func main() {
 	mat := gocv.IMRead(filename, gocv.IMReadColor)
 	defer mat.Close()
 
+	gocv.Resize(mat, &mat, image.Point{X: 0, Y: 0}, 0.75, 0.75, gocv.InterpolationLinear)
+
 	orig := mat.Clone()
 	defer orig.Close()
-
-	gocv.Resize(mat, &mat, image.Point{X:0,Y:0}, 0.75, 0.75, gocv.InterpolationLinear)
 
 	// convert the image to grayscale, blur it, and find edges
 	// in the image
@@ -80,7 +80,6 @@ func main() {
 	defer kernel.Close()
 	gocv.Dilate(edged, &edged, kernel)
 	window = displayMat(edged, "dilated")
-
 
 	/*
 	   cnts = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -163,20 +162,40 @@ func main() {
 
 	fmt.Println(matLines.Cols())
 	fmt.Println(matLines.Rows())
+	tl := image.Point{X: mat.Size()[0] + 1, Y: mat.Size()[1] + 1}
+	br := image.Point{X: -1, Y: -1}
+
+	fmt.Println("TL: ", tl)
+	fmt.Println("BR: ", br)
+
 	for i := 0; i < matLines.Rows(); i++ {
 		pt1 := image.Pt(int(matLines.GetVeciAt(i, 0)[0]), int(matLines.GetVeciAt(i, 0)[1]))
 		pt2 := image.Pt(int(matLines.GetVeciAt(i, 0)[2]), int(matLines.GetVeciAt(i, 0)[3]))
 		gocv.Line(&mat, pt1, pt2, color.RGBA{0, 255, 0, 50}, 2)
-		fmt.Println("Pt1:(", pt1.X, ", ", pt1.Y, ")" )
+		fmt.Println("Pt1:(", pt1.X, ", ", pt1.Y, ")")
 		fmt.Println("Pt2: ", pt2)
+
+		tl.Y = Min(tl.Y, pt1.Y)
+		tl.Y = Min(tl.Y, pt2.Y)
+
+		br.Y = Max(br.Y, pt1.Y)
+		br.Y = Max(br.Y, pt2.Y)
+
+		tl.X = Min(tl.X, pt1.X)
+		tl.X = Min(tl.X, pt2.X)
+
+		br.X = Max(br.X, pt1.X)
+		br.X = Max(br.X, pt2.X)
+
+		fmt.Println("TL: ", tl)
+		fmt.Println("BR: ", br)
 	}
 
-	for {
-		window.IMShow(mat)
-		if window.WaitKey(10) >= 0 {
-			break
-		}
-	}
+	displayMat(mat, "Lines")
+
+	snapped := color.RGBA{0, 255, 0, 50}
+	gocv.Rectangle(&orig, image.Rectangle{Min: tl, Max: br}, snapped, 2)
+	displayMat(orig, "Result")
 }
 
 func displayMat(mat gocv.Mat, windowName string) *gocv.Window {
@@ -190,4 +209,20 @@ func displayMat(mat gocv.Mat, windowName string) *gocv.Window {
 		}
 	}
 	return window
+}
+
+// Max returns the larger of x or y.
+func Max(x, y int) int {
+	if x < y {
+		return y
+	}
+	return x
+}
+
+// Min returns the smaller of x or y.
+func Min(x, y int) int {
+	if x > y {
+		return y
+	}
+	return x
 }
