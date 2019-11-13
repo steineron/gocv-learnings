@@ -53,7 +53,7 @@ func main() {
 	window.Close()
 
 
-	//gocv.Resize(mat, &mat, image.Point{X: 0, Y: 0}, 0.75, 0.75, gocv.InterpolationLinear)
+	gocv.Resize(mat, &mat, image.Point{X: 0, Y: 0}, 0.75, 0.75, gocv.InterpolationLinear)
 
 	orig := mat.Clone()
 	defer orig.Close()
