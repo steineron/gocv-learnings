@@ -49,7 +49,11 @@ func main() {
 	mat := gocv.IMRead(filename, gocv.IMReadColor)
 	defer mat.Close()
 
-	gocv.Resize(mat, &mat, image.Point{X: 0, Y: 0}, 0.75, 0.75, gocv.InterpolationLinear)
+	window := displayMat(mat, "grayed")
+	window.Close()
+
+
+	//gocv.Resize(mat, &mat, image.Point{X: 0, Y: 0}, 0.75, 0.75, gocv.InterpolationLinear)
 
 	orig := mat.Clone()
 	defer orig.Close()
@@ -67,7 +71,7 @@ func main() {
 	// first use threshold
 	//gocv.Threshold(gray, &gray, 25, 255, gocv.ThresholdBinary)
 
-	window := displayMat(gray, "grayed")
+	window = displayMat(gray, "grayed")
 
 	edged := gocv.NewMat()
 	//gocv.Canny(gray, &edged, 75.0, 200.0)
@@ -149,6 +153,8 @@ func main() {
 		//display.Close()//
 	}
 
+	window.Close()
+
 	// detect lines example
 
 	mat = edged//orig
@@ -194,8 +200,12 @@ func main() {
 	displayMat(mat, "Lines")
 
 	snapped := color.RGBA{0, 255, 0, 50}
-	gocv.Rectangle(&orig, image.Rectangle{Min: tl, Max: br}, snapped, 2)
+	crop := image.Rectangle{Min: tl, Max: br}
+	gocv.Rectangle(&orig, crop, snapped, 2)
 	displayMat(orig, "Result")
+
+
+	displayMat(orig.Region(crop), "Cropped")
 }
 
 func displayMat(mat gocv.Mat, windowName string) *gocv.Window {
